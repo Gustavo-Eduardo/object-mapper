@@ -17,7 +17,7 @@ const exampleObject: Object = {
 
 const exampleKeyMapper: keyMapper = new Map<MapperKey, MapperValue>([
   ["badNameKey", "goodNameKey"],
-  ["aNumber", (stringNumber) => Number],
+  ["aNumber", Number],
   ["badkeyWithOperation", ["upperCaseText", (text) => text.toUpperCase()]],
   [
     ["length", "width"],
