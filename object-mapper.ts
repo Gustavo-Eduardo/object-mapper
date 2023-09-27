@@ -1,37 +1,25 @@
-declare type adapterFunction = (...args: any[]) => any;
-declare type MapperKey = string | string[];
-declare type MapperValue = string | [string, adapterFunction] | adapterFunction;
-declare type keyMapper = Map<MapperKey, MapperValue>;
 
-export {adapterFunction, MapperKey, MapperValue, keyMapper}
 
-function objectMapper(object: Object, keyMap: keyMapper): Object {
-  const adaptedObject: Object = {};
-  keyMap.forEach((value: MapperValue, key: MapperKey) => {
-    if (typeof key === "string") {
-      if (typeof value === "string") {
-        const newKey: string = value;
-        adaptedObject[newKey] = object[key];
-      } else if (Array.isArray(value)) {
-        const objectValue: any = object[key];
-        const [newKey, adapterFunction]: [string, adapterFunction] = value;
-        adaptedObject[newKey] = adapterFunction(objectValue);
-      } else if (typeof value === "function") {
-        const objectValue: any = object[key];
-        const adapterFunction: adapterFunction = value;
-        adaptedObject[key] = adapterFunction(objectValue);
-      }
-    } else if (Array.isArray(key)) {
-      if (Array.isArray(value)) {
-        const adapterFunctionArgs: any[] = key.map(
-          (key: string): any => object[key]
-        );
-        const [newKey, adapterFunction]: [string, adapterFunction] = value;
-        adaptedObject[newKey] = adapterFunction(...adapterFunctionArgs);
-      }
+type Mapper = {
+    input: string | string[],
+    output: string,
+    adapter?: Function,
+}[]
+
+function objectMapper(inputObject: Object, mapper: Mapper): Object {
+    const adaptedObject = {}
+    for (let adapt of mapper) {
+        if (typeof adapt.input === "string") {
+            const inputValue = inputObject[adapt.input]
+            const outputValue = adapt.adapter ? adapt.adapter(inputValue) : inputValue
+            adaptedObject[adapt.output] = outputValue
+        } else if (Array.isArray(adapt.input)) {
+            if (!adapt.adapter) continue
+            const inputValues = adapt.input.map(inputKey => inputObject[inputKey])
+            const outputValue = adapt.adapter(...inputValues)
+            adaptedObject[adapt.output] = outputValue
+        }
     }
-  });
-  return Object.assign(adaptedObject, object);
+    return adaptedObject
 }
 
-export { objectMapper };

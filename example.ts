@@ -1,10 +1,4 @@
 import { objectMapper } from "./object-mapper";
-import {
-  adapterFunction,
-  MapperKey,
-  MapperValue,
-  keyMapper,
-} from "./object-mapper";
 
 const exampleObject: Object = {
   simpleKey: "value",
@@ -15,15 +9,28 @@ const exampleObject: Object = {
   width: 4,
 };
 
-const exampleKeyMapper: keyMapper = new Map<MapperKey, MapperValue>([
-  ["badNameKey", "goodNameKey"],
-  ["aNumber", Number],
-  ["badkeyWithOperation", ["upperCaseText", (text) => text.toUpperCase()]],
-  [
-    ["length", "width"],
-    ["area", (length, width) => length * width],
-  ],
-]);
+const exampleKeyMapper = [
+  {
+    input: "badNameKey",
+    output: "goodNameKey",
+  },
+  {
+    input: "aNumber",
+    output: "aNumber",
+    adapter: Number,
+  },
+  {
+    input: "badkeyWithOperation",
+    output: "upperCaseText",
+    adapter: (text) => text.toUpperCase(),
+  },
+  {
+    input: ["length", "width"],
+    output: "area",
+    adapter: (length, width) => length * width,
+  },
+  
+];
 
 let newObject = objectMapper(exampleObject, exampleKeyMapper);
 
